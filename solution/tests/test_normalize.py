@@ -52,6 +52,10 @@ def test_parse_date(raw, expected):
     ("rs 1,00,000", "100000.00"),
     ("Rs.500", "500.00"),
     ("10.005", "10.01"),             # half-up rounding
+    ("27,554", "27554.00"),          # Western grouping
+    ("12,34,567.5", "1234567.50"),   # Indian grouping
+    ("1,2,3", None),                 # malformed separators
+    ("12,34", None),
     ("-", None),
     ("-5", None),                    # must be >= 0
     ("twelve thousand", None),

@@ -110,6 +110,7 @@ def parse_date(raw: str | None) -> str | None:
 
 _CURRENCY_PREFIX = re.compile(r"^(?:₹|rs\.?|inr)\s*", re.IGNORECASE)
 _PLAIN_NUMBER = re.compile(r"^(?:\d+(?:\.\d*)?|\.\d+)$")
+_GROUPED_NUMBER = re.compile(r"^(?:\d{1,3}(?:,\d{3})+|\d{1,2}(?:,\d{2})*,\d{3})(?:\.\d*)?$")
 _TWO_PLACES = Decimal("0.01")
 
 
@@ -121,7 +122,11 @@ def parse_decimal(raw: str | None) -> str | None:
     """
     if raw is None:
         return None
-    value = _CURRENCY_PREFIX.sub("", raw.strip()).replace(",", "").strip()
+    value = _CURRENCY_PREFIX.sub("", raw.strip()).strip()
+    if "," in value:
+        if not _GROUPED_NUMBER.match(value):
+            return None  # malformed separators, e.g. '1,2,3' or '12,34'
+        value = value.replace(",", "")
     if not _PLAIN_NUMBER.match(value):
         return None  # covers '-', '-5', 'twelve thousand', ''
     try:
